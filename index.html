@@ -1,15 +1,69 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XAUUSD Pro Trading Platform</title>
+  <title>XAUUSD PRO Trading Platform</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>XAUUSD PRO</h1>
-  <p>Professional Gold Market Analysis</p>
+  <div class="container">
 
+    <header>
+      <h1>XAUUSD PRO</h1>
+      <p>Professional Gold Market Analysis</p>
+    </header>
+
+    <main class="dashboard">
+
+      <div class="card">
+        <h3>TRADING SIGNAL</h3>
+        <div class="value wait" id="signal">WAIT</div>
+      </div>
+
+      <div class="card">
+        <h3>GOLD PRICE</h3>
+        <div class="value" id="price">Loading...</div>
+      </div>
+
+      <div class="card">
+        <h3>TIMEFRAME</h3>
+        <div class="value">M15</div>
+      </div>
+
+      <div class="card">
+        <h3>RSI (14)</h3>
+        <div class="value" id="rsi">--</div>
+      </div>
+
+      <div class="card">
+        <h3>EMA 9</h3>
+        <div class="value" id="ema9">--</div>
+      </div>
+
+      <div class="card">
+        <h3>EMA 21</h3>
+        <div class="value" id="ema21">--</div>
+      </div>
+
+      <div class="card">
+        <h3>EMA 50</h3>
+        <div class="value" id="ema50">--</div>
+      </div>
+
+    </main>
+
+    <footer>
+      XAUUSD PRO © 2026
+      <p>Trading involves risk. Signals are not guaranteed.</p>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
+
