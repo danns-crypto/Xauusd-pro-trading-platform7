@@ -19,7 +19,7 @@ const marketState = {
   price: null,
   signal: "WAIT",
   lastUpdated: null,
-  dataProvider: "GoldPrice.dev"
+  dataProvider: "biquote"
 };
 
 // Calculate Exponential Moving Average
