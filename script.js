@@ -264,7 +264,7 @@ prices.push(quote.mid);
 
   console.error("Market update failed:", error.message);
 }
-
+}
 // Start market data updates
 updateMarketData();
 setInterval(updateMarketData, 60000);
