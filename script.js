@@ -162,9 +162,15 @@ async function fetchLiveQuote() {
 
   const quote = await response.json();
 
-  if (!isValidQuote(quote)) {
-    throw new Error("Live quote is stale, closed or invalid");
+  if (quote && quote.marketState === "closed") {
+    throw new Error("MARKET_CLOSED");
   }
+
+  if (!isValidQuote(quote)) {
+    throw new Error("Live quote is stale or invalid");
+  }
+
+  document.getElementById("marketStatus").textContent = "LIVE";
 
   return quote;
 }
@@ -243,12 +249,21 @@ prices.push(quote.mid);
     console.log("XAUUSD market updated:", marketState);
 
   } catch (error) {
-    marketState.signal = "WAIT";
+  marketState.signal = "WAIT";
 
-    document.getElementById("signal").textContent = "WAIT";
+  document.getElementById("signal").textContent = "WAIT";
+  document.getElementById("signal").className = "value wait";
 
-    console.error("Market update failed:", error.message);
+  const statusElement = document.getElementById("marketStatus");
+
+  if (error.message === "MARKET_CLOSED") {
+    statusElement.textContent = "CLOSED";
+  } else {
+    statusElement.textContent = "STALE";
   }
+
+  console.error("Market update failed:", error.message);
+}
 }
 // Start market data updates
 updateMarketData();
