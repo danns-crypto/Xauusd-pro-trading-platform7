@@ -213,6 +213,11 @@ async function updateMarketData() {
     marketState.price = price;
     marketState.signal = signal;
     marketState.lastUpdated = quote.timestamp;
+    document.getElementById("lastUpdated").textContent =
+  "Last updated: " +
+  new Date(quote.timestamp).toLocaleString("en-KE", {
+    timeZone: "Africa/Nairobi"
+  });
 
     document.getElementById("price").textContent =
       price.toFixed(2);
