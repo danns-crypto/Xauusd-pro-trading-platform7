@@ -105,3 +105,145 @@ function generateSignal(price, ema9, ema21, ema50, rsi) {
 console.log("XAUUSD PRO analysis engine initialized.");
 console.log("Timeframe:", CONFIG.timeframe);
 console.log("Data provider:", marketState.dataProvider);
+// BiQuote API endpoints
+const QUOTE_API = "https://biquote.io/api/XAUUSD";
+const CANDLES_API = "https://biquote.io/api/XAUUSD/ohlc?interval=15m&limit=100";
+
+// Check whether the live quote is valid
+function isValidQuote(quote) {
+  return (
+    quote &&
+    quote.symbol === "XAUUSD" &&
+    Number.isFinite(quote.mid) &&
+    quote.mid > 0 &&
+    quote.stale === false &&
+    quote.marketState === "open" &&
+    Number.isFinite(quote.quoteAgeSeconds) &&
+    quote.quoteAgeSeconds <= 30
+  );
+}
+async function fetchCandles() {
+  const response = await fetch(CANDLES_API, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to fetch XAUUSD candles");
+  }
+
+  const data = await response.json();
+
+  if (
+    data.symbol !== "XAUUSD" ||
+    !Array.isArray(data.bars)
+  ) {
+    throw new Error("Invalid candle data");
+  }
+
+  return data.bars
+    .filter(bar =>
+      bar.isOpen === false &&
+      Number.isFinite(bar.close) &&
+      bar.close > 0 &&
+      !Number.isNaN(Date.parse(bar.openTime))
+    )
+    .sort((a, b) =>
+      Date.parse(a.openTime) - Date.parse(b.openTime)
+    );
+}
+async function fetchLiveQuote() {
+  const response = await fetch(QUOTE_API, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to fetch live XAUUSD quote");
+  }
+
+  const quote = await response.json();
+
+  if (!isValidQuote(quote)) {
+    throw new Error("Live quote is stale, closed or invalid");
+  }
+
+  return quote;
+}
+async function updateMarketData() {
+  try {
+    const [quote, candles] = await Promise.all([
+      fetchLiveQuote(),
+      fetchCandles()
+    ]);
+
+    if (candles.length < CONFIG.indicators.emaTrend) {
+      throw new Error("Not enough completed candles");
+    }
+
+    const prices = candles.map(bar => bar.close);
+    const price = quote.mid;
+
+    const ema9 = calculateEMA(
+      prices,
+      CONFIG.indicators.emaFast
+    );
+
+    const ema21 = calculateEMA(
+      prices,
+      CONFIG.indicators.emaSlow
+    );
+
+    const ema50 = calculateEMA(
+      prices,
+      CONFIG.indicators.emaTrend
+    );
+
+    const rsi = calculateRSI(
+      prices,
+      CONFIG.indicators.rsi
+    );
+
+    const signal = generateSignal(
+      price,
+      ema9,
+      ema21,
+      ema50,
+      rsi
+    );
+
+    marketState.price = price;
+    marketState.signal = signal;
+    marketState.lastUpdated = quote.timestamp;
+
+    document.getElementById("price").textContent =
+      price.toFixed(2);
+
+    document.getElementById("ema9").textContent =
+      ema9.toFixed(2);
+
+    document.getElementById("ema21").textContent =
+      ema21.toFixed(2);
+
+    document.getElementById("ema50").textContent =
+      ema50.toFixed(2);
+
+    document.getElementById("rsi").textContent =
+      rsi.toFixed(2);
+
+    const signalElement = document.getElementById("signal");
+
+    signalElement.textContent = signal;
+    signalElement.className = "value " + signal.toLowerCase();
+
+    console.log("XAUUSD market updated:", marketState);
+
+  } catch (error) {
+    marketState.signal = "WAIT";
+
+    document.getElementById("signal").textContent = "WAIT";
+
+    console.error("Market update failed:", error.message);
+  }
+}
+// Start market data updates
+updateMarketData();
+setInterval(updateMarketData, 60000);
