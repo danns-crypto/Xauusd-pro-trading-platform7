@@ -180,6 +180,7 @@ async function updateMarketData() {
     }
 
     const prices = candles.map(bar => bar.close);
+prices.push(quote.mid);
     const price = quote.mid;
 
     const ema9 = calculateEMA(
