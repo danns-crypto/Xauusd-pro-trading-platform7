@@ -259,7 +259,7 @@ prices.push(quote.mid);
   if (error.message === "MARKET_CLOSED") {
     statusElement.textContent = "CLOSED";
   } else {
-    statusElement.textContent = "STALE";
+    statusElement.textContent = "ERROR: " + error.message;
   }
 
   console.error("Market update failed:", error.message);
